@@ -4,6 +4,7 @@
 #include "../src/GlobalDefinitions.h"
 #include "../src/sourcedecoders/fdk_aac_enc_codec.h"
 #include "../src/sourcedecoders/fdk_aac_codec.h"
+#include "../src/sourcedecoders/aac_codec.h"
 
 using namespace std;
 
@@ -16,6 +17,7 @@ private slots:
     void roundTrip_data();
     void roundTrip();
     void corruptedCrc();
+    void faadDecoder();
 };
 
 struct Result {
@@ -157,6 +159,40 @@ void DrmAacTest::corruptedCrc()
             bad++;
     }
     QVERIFY2(bad > good, qPrintable(QString("accepted %1 of %2 frames with a wrong CRC").arg(good).arg(good + bad)));
+}
+
+void DrmAacTest::faadDecoder()
+{
+    /* The same frames through the FAAD2 based AacCodec (the decoder used when Dream is
+       built without fdk-aac). Every frame has to decode, with the result value set (it
+       used to be returned uninitialised) and with the audio kept (a tail clearing loop
+       must not wipe the frame). Skipped when FAAD2 has no DRM support. */
+    CAudioParam ap = makeParam(CAudioParam::AM_MONO, true, CAudioParam::AS_24KHZ);
+    Result r;
+    QVERIFY(run(ap, 20000, 60, r));
+    AacCodec dec;
+    int rate = 0;
+    if (!dec.DecOpen(ap, rate))
+        QSKIP("no usable FAAD2 library with DRM support");
+    long ok = 0, bad = 0;
+    double energy = 0.0;
+    for (size_t i = 0; i < r.coded.size(); i++) {
+        vector<uint8_t> frame(r.coded[i].begin() + 1, r.coded[i].end());
+        CVector<_REAL> L, R;
+        L.Init(4096);
+        R.Init(4096);
+        if (dec.Decode(frame, r.coded[i][0], L, R) == CAudioCodec::DECODER_ERROR_OK) {
+            ok++;
+            if (i > 12)
+                for (int s = 0; s < L.Size(); s++)
+                    energy += L[s] * L[s];
+        }
+        else if (i > 6)
+            bad++;
+    }
+    QVERIFY2(ok >= 50, qPrintable(QString("only %1 of %2 frames decoded").arg(ok).arg(r.coded.size())));
+    QCOMPARE(bad, 0L);
+    QVERIFY2(energy > 1e9, qPrintable(QString("decoded audio is silent (energy %1)").arg(energy)));
 }
 
 QTEST_APPLESS_MAIN(DrmAacTest)

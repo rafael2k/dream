@@ -1378,6 +1378,9 @@ CDRMReceiver::saveSDCtoFile()
     if (pFile == nullptr)
         pFile = fopen("test/altfreq.dat", "w");
 
+    if (pFile == nullptr)
+        return; /* no test directory: nothing to write to */
+
     Parameters.Lock();
     size_t inum = Parameters.AltFreqSign.vecMultiplexes.size();
     for (size_t z = 0; z < inum; z++)
