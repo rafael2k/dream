@@ -149,7 +149,7 @@ CPaCommon::SetItem(string sNewDevice)
 }
 
 string
-CPaCommon::GetItem()
+CPaCommon::GetItemName()
 {
     return dev;
 }
@@ -386,7 +386,7 @@ CPaIn::Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking)
 }
 
 bool
-CPaIn::Read(CVector<short>& psData)
+CPaIn::Read(CVector<short>& psData, CParameter& /*Parameters*/)
 {
     return hw.Read(psData);
 }

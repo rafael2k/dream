@@ -34,7 +34,7 @@
 #include <portaudio.h>
 #include "pa_ringbuffer.h"
 
-class CPaCommon : public CSelectionInterface, public CSelectionInterface
+class CPaCommon : public CSelectionInterface
 {
 public:
     CPaCommon(bool);
@@ -67,7 +67,7 @@ protected:
     static int pa_count;
 };
 
-class CPaIn : public CSoundInInterface, CSelectionInterface<CSoundInInterface>
+class CPaIn : public CSoundInInterface
 {
 public:
     CPaIn();
@@ -92,13 +92,13 @@ public:
 
     virtual bool Init(int iSampleRate, int iNewBufferSize, bool bNewBlocking);
     virtual void Close();
-    virtual bool Read(CVector<short> &psData);
+    virtual bool Read(CVector<short> &psData, CParameter &Parameters);
 
 protected:
     CPaCommon hw;
 };
 
-class CPaOut : public CSoundOutInterface, CSelectionInterface<CSoundOutInterface>
+class CPaOut : public CSoundOutInterface
 {
 public:
     CPaOut();
@@ -115,7 +115,6 @@ public:
     {
         return hw.GetItemName();
     }
-    virtual CSoundOutInterface* GetItem() { return this; a}
     virtual std::string GetVersion()
     {
         return Pa_GetVersionInfo()->versionText;

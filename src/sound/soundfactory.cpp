@@ -27,6 +27,7 @@
 \******************************************************************************/
 #include <algorithm>
 #include "soundfactory.h"
+#include <iostream>
 
 #ifdef _WIN32
 /* mmsystem sound interface */
@@ -137,7 +138,13 @@ CSoundFactoryIn::CSoundFactoryIn():CSoundFactory<CSoundInInterface>()
 #endif
 
 #ifdef USE_JACK
-    drivers.push_back(new CSoundInJack());
+    /* the constructor throws when there is no Jack server: skip the driver then
+       instead of terminating the program */
+    try {
+        drivers.push_back(new CSoundInJack());
+    } catch (...) {
+        std::cerr << "Jack is not available, not using it for input" << std::endl;
+    }
 #endif
 
 #ifdef USE_PULSEAUDIO
@@ -145,7 +152,7 @@ CSoundFactoryIn::CSoundFactoryIn():CSoundFactory<CSoundInInterface>()
 #endif
 
 #ifdef USE_PORTAUDIO
-    drivers.push_back(new CSoundInPaIn());
+    drivers.push_back(new CPaIn());
 #endif
 
 #ifdef USE_OPENSL
@@ -171,7 +178,11 @@ CSoundFactoryOut::CSoundFactoryOut():CSoundFactory<CSoundOutInterface>()
 #endif
 
 #ifdef USE_JACK
-  drivers.push_back(new CSoundOutJack());
+  try {
+    drivers.push_back(new CSoundOutJack());
+  } catch (...) {
+    std::cerr << "Jack is not available, not using it for output" << std::endl;
+  }
 #endif
 
 #ifdef USE_PULSEAUDIO
@@ -179,7 +190,7 @@ CSoundFactoryOut::CSoundFactoryOut():CSoundFactory<CSoundOutInterface>()
 #endif
 
 #ifdef USE_PORTAUDIO
-  drivers.push_back(new CSoundOutPaOut());
+  drivers.push_back(new CPaOut());
 #endif
 
 #ifdef USE_OPENSL
