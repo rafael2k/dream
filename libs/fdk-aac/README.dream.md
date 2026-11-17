@@ -1,12 +1,13 @@
 # fdk-aac (vendored)
 
-Copy of the `master` branch of https://github.com/rafael2k/fdk-aac, which is Martin Storsjo's
-fdk-aac 3.0.0 plus:
+Copy of the `master` branch of https://github.com/rafael2k/fdk-aac (607acfc, which merges
+mstorsjo/fdk-aac master of 2026-11-16), i.e. Martin Storsjo's fdk-aac 3.0.0 plus:
 - the xHE-AAC encoder and DRM USAC/AAC decoding support that come with that fork,
-- lower minimum xHE-AAC bit rates (mono 6 kbit/s, stereo 12 kbit/s, branch
-  `upstream/xhe-low-bitrate`; the same change is in `../patches/`),
+- lower minimum xHE-AAC bit rates (mono 4 kbit/s, stereo 12 kbit/s) and HE-AAC SBR tuning
+  below 8 kbit/s: these two changes are now in upstream mstorsjo/fdk-aac (PRs #185 and #187;
+  `../patches/` keeps the xHE one for builds against a stock fdk-aac),
 - the DRM AAC / HE-AAC / HE-AAC v2 encoder (object types 143, 144, 145, 960 sample frames,
-  HCR, VCB11, branch `upstream/drm-encoder`, see `README.DRM.md`).
+  HCR, VCB11, see `README.DRM.md`; kept in the fork, upstream declined it in PR #186).
 Only the library sources are kept (no documentation, fuzzer, rust, tests, example programs,
 Debian packaging).
 
