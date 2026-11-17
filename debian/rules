@@ -18,6 +18,11 @@ export QT_SELECT := qt5
 %:
 	dh $@
 
+# AAC / HE-AAC / xHE-AAC decoding and transmit use the fdk-aac in libs/fdk-aac
+# (built with cmake, linked statically)
+override_dh_auto_configure:
+	dh_auto_configure -- CONFIG+=vendored-fdk
+
 
 # dh_make generated override targets
 # This is example for Cmake (See https://bugs.debian.org/641051 )

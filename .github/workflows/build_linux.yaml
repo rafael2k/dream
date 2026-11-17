@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-26.04]
         arch: [x64]
 
     steps:
@@ -25,7 +25,7 @@ jobs:
         fetch-depth: 0
   
     - name: Install dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-26.04'
       run: |
         sudo apt-get update
 
@@ -34,29 +34,29 @@ jobs:
           zlib1g-dev libspeexdsp-dev libgps-dev libpcap-dev libsoapysdr-dev \
           libqwt-qt5-dev libqt5svg5-dev libqt5opengl5-dev libqt5gui5 libqt5widgets5 \
           qtbase5-dev qtbase5-dev-tools qt5-qmake build-essential \
-          debhelper qtchooser fakeroot git2cl \
+          debhelper qtchooser fakeroot git2cl cmake \
           libjack-jackd2-dev libasound2-dev
-
-    - name: Install dependencies (vcpkg)
-      if: matrix.arch == 'x64'
-      run: |
-       vcpkg install --triplet ${{ matrix.arch }}-linux fdk-aac[he-aac]
-       echo "PKG_CONFIG_PATH=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-linux/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
     - name: changelog
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        echo RELEASE_TAG=`gh release list --limit 1 --exclude-drafts --exclude-pre-releases --json tagName --jq '.[].tagName'` >> $GITHUB_ENV
-        truncate -s 0 debian/changelog
-        for r in `gh release list --exclude-drafts --exclude-pre-releases --json tagName --jq '.[].tagName'`
-        do
-          echo "dream ($r) unstable; urgency=medium" >> debian/changelog
-          echo >> debian/changelog
-          git log -1 --format='  * %s' $r -- >> debian/changelog
-          echo >> debian/changelog
-          git log -1 --format=' -- %an <%ae>  %aD' $r -- >> debian/changelog
-        done
+        TAGS=`gh release list --exclude-drafts --exclude-pre-releases --json tagName --jq '.[].tagName'`
+        if [ -n "$TAGS" ]; then
+          echo RELEASE_TAG=`gh release list --limit 1 --exclude-drafts --exclude-pre-releases --json tagName --jq '.[].tagName'` >> $GITHUB_ENV
+          truncate -s 0 debian/changelog
+          for r in $TAGS
+          do
+            echo "dream ($r) unstable; urgency=medium" >> debian/changelog
+            echo >> debian/changelog
+            git log -1 --format='  * %s' $r -- >> debian/changelog
+            echo >> debian/changelog
+            git log -1 --format=' -- %an <%ae>  %aD' $r -- >> debian/changelog
+          done
+        else
+          # only pre-releases so far: keep debian/changelog as it is
+          echo RELEASE_TAG=`dpkg-parsechangelog -S Version` >> $GITHUB_ENV
+        fi
         python3 -c "print('ARCH='+{'x64': 'amd64'}['${{matrix.arch}}'])" >> $GITHUB_ENV
 
     - name: Package
