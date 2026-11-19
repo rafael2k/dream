@@ -128,6 +128,7 @@ CParameter::CParameter():
     iNewAudSampleRate(0),
     iNewSoundcardSigSampleRate(0),
     iNewSigUpscaleRatio(0),
+    iNewSigDownscaleRatio(0),
     rSysSimSNRdB(0.0),
     iFrequency(0),
     bValidSignalStrength(false),
@@ -242,6 +243,7 @@ CParameter::CParameter(const CParameter& p):
     iNewAudSampleRate(p.iNewAudSampleRate),
     iNewSoundcardSigSampleRate(p.iNewSoundcardSigSampleRate),
     iNewSigUpscaleRatio(p.iNewSigUpscaleRatio),
+    iNewSigDownscaleRatio(p.iNewSigDownscaleRatio),
     rSysSimSNRdB(p.rSysSimSNRdB),
     iFrequency(p.iFrequency),
     bValidSignalStrength(p.bValidSignalStrength),
@@ -353,6 +355,7 @@ CParameter& CParameter::operator=(const CParameter& p)
     iNewAudSampleRate = p.iNewAudSampleRate;
     iNewSoundcardSigSampleRate = p.iNewSoundcardSigSampleRate;
     iNewSigUpscaleRatio = p.iNewSigUpscaleRatio;
+    iNewSigDownscaleRatio = p.iNewSigDownscaleRatio;
     rSysSimSNRdB = p.rSysSimSNRdB;
     iFrequency = p.iFrequency;
     bValidSignalStrength = p.bValidSignalStrength;

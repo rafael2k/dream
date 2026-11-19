@@ -159,13 +159,23 @@ CSoundCardSelMenu::CSoundCardSelMenu(CTRx& ntrx,
         QMenu* menuSignal = addMenu(tr("Signal Output"));
         menuOutputDev = menuSignal->addMenu(tr("Device"));
 
-        connect(InitSampleRate(menuAudio, tr("Sample Rate"), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInSampleRate(QAction*)));
-        connect(InitSampleRate(menuSignal, tr("Sample Rate"), SignalSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutSampleRate(QAction*)));
+        connect(InitSampleRate(menuAudio, tr("Sample Rate"), AudioSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundInputSampleRate(QAction*)));
+        connect(InitSampleRate(menuSignal, tr("Sample Rate"), SignalSampleRateTable), SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutputSampleRate(QAction*)));
+
+        /* choosing an input device, and filling the input device menu when the transmitter reports it */
+        connect(this, SIGNAL(soundInDeviceChanged(QString)), &trx, SLOT(SetInputDevice(QString)));
+        connect(&trx, SIGNAL(InputDeviceChanged(QString)), this, SLOT(OnSoundInDeviceChanged(QString)));
     }
 
     connect(menuOutputDev, SIGNAL(triggered(QAction*)), this, SLOT(OnSoundOutDevice(QAction*)));
     connect(this, SIGNAL(soundOutDeviceChanged(QString)), &trx, SLOT(SetOutputDevice(QString)));
     connect(&trx, SIGNAL(OutputDeviceChanged(QString)), this, SLOT(OnSoundOutDeviceChanged(QString)));
+
+    if (!bReceiver)
+    {   /* the transmitter loaded its settings before this menu existed: fill the device menus now */
+        OnSoundInDeviceChanged(QString::fromStdString(trx.GetInputDevice()));
+        OnSoundOutDeviceChanged(QString::fromStdString(trx.GetOutputDevice()));
+    }
 }
 
 void CSoundCardSelMenu::OnSoundInDevice(QAction* action)

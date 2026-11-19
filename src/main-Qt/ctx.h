@@ -56,6 +56,7 @@ private:
     CDRMTransmitter& tx;
     ERunState eRunState;
 signals:
+    void InputDeviceChanged(QString);
     void OutputDeviceChanged(QString);
 };
 
