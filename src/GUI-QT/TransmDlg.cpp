@@ -412,6 +412,8 @@ TransmDialog::TransmDialog(CTx& ntx, QWidget* parent)
         reinterpret_cast<QObject*>(this), SLOT(OnButtonStartStop()));
 	connect(ButtonCodec, SIGNAL(clicked()),
         reinterpret_cast<QObject*>(this), SLOT(OnButtonCodec()));
+	connect(CheckBoxXHEStereo, SIGNAL(toggled(bool)),
+        reinterpret_cast<QObject*>(this), SLOT(OnCheckBoxXHEStereo(bool)));
 	connect(PushButtonAddText, SIGNAL(clicked()),
         reinterpret_cast<QObject*>(this), SLOT(OnPushButtonAddText()));
 	connect(PushButtonClearAllText, SIGNAL(clicked()),

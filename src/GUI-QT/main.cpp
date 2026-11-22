@@ -140,6 +140,7 @@ void txgc(CSettings &Settings, QCoreApplication &app, bool gui = true)
   Worker worker(trx);
   QObject::connect(&worker, SIGNAL(finished()), &app, SLOT(quit()), Qt::QueuedConnection);
   if (gui) {
+    dynamic_cast<CTx*>(trx)->SetWaitForStart(true); // transmit only after the Start button
     TransmDialog *pMainDlg = new TransmDialog(*dynamic_cast<CTx*>(trx));
     trx->LoadSettings(); // load settings after GUI initialised so LoadSettings
                        // signals get captured
@@ -149,6 +150,10 @@ void txgc(CSettings &Settings, QCoreApplication &app, bool gui = true)
   }
   worker.start();
   app.exec();
+  if (gui) {
+    dynamic_cast<CTx*>(trx)->Quit();
+    worker.wait();
+  }
   trx->SaveSettings();
 }
 

@@ -3,6 +3,7 @@
 
 #include "ctrx.h"
 #include <QObject>
+#include <atomic>
 
 class CDRMTransmitter;
 
@@ -14,6 +15,11 @@ public:
     virtual ~CTx() override;
     void run() override;
     bool isRunning() { return eRunState != STOPPED; }
+    /* With the window the transmitter thread stays alive and waits for Restart() (the
+       Start button) instead of transmitting as soon as the program starts */
+    void SetWaitForStart(bool b) { bWaitForStart = b; }
+    /* ask the thread to end (also when it waits for a start) */
+    void Quit() { bQuit = true; }
 
     virtual std::string GetInputDevice();
     virtual std::string GetOutputDevice();
@@ -54,7 +60,9 @@ public slots:
     virtual void SetFrequency(int) override;
 private:
     CDRMTransmitter& tx;
-    ERunState eRunState;
+    std::atomic<ERunState> eRunState;
+    std::atomic<bool> bWaitForStart;
+    std::atomic<bool> bQuit;
 signals:
     void InputDeviceChanged(QString);
     void OutputDeviceChanged(QString);

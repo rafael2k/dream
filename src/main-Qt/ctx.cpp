@@ -1,8 +1,9 @@
 #include <QEventLoop>
+#include <QThread>
 #include "ctx.h"
 #include "../DrmTransmitter.h"
 
-CTx::CTx(CDRMTransmitter& nTx, CTRx *parent): CTRx(parent), tx(nTx), eRunState(STOPPED)
+CTx::CTx(CDRMTransmitter& nTx, CTRx *parent): CTRx(parent), tx(nTx), eRunState(STOPPED), bWaitForStart(false), bQuit(false)
 {
 
 }
@@ -17,37 +18,53 @@ CTx::run()
 {
     QEventLoop eventLoop;
     qDebug("Working thread started");
-    try
+    do
     {
-        /* Set restart flag */
-        eRunState = RESTART;
-        do
+        if (bWaitForStart)
         {
-            /* Initialization of the modules */
-            tx.Init();
-            /* Set run flag */
-            eRunState = RUNNING;
+            /* wait for the Start button (Restart()) or for the end of the program */
+            while (eRunState == STOPPED && !bQuit)
+            {
+                eventLoop.processEvents();
+                QThread::msleep(20);
+            }
+            if (bQuit)
+                break;
+        }
+        else
+            eRunState = RESTART;
 
-            /* Start the transmitter run routine */
+        try
+        {
             do
             {
-                tx.process();
-                eventLoop.processEvents();
-            } while (eRunState == RUNNING && !tx.CanSoftStopExit());
-        }
-        while (eRunState == RESTART);
+                /* Initialization of the modules */
+                tx.Init();
+                /* Set run flag */
+                eRunState = RUNNING;
 
-        /* Closing the sound interfaces */
-        tx.Close();
-    }
-    catch (CGenErr GenErr)
-    {
-        qDebug("%s", GenErr.strError.c_str());
-    }
-    catch (string strError)
-    {
-        qDebug("%s", strError.c_str());
-    }
+                /* Start the transmitter run routine */
+                do
+                {
+                    tx.process();
+                    eventLoop.processEvents();
+                } while (eRunState == RUNNING && !tx.CanSoftStopExit() && !bQuit);
+            }
+            while (eRunState == RESTART && !bQuit);
+
+            /* Closing the sound interfaces */
+            tx.Close();
+        }
+        catch (CGenErr GenErr)
+        {
+            qDebug("%s", GenErr.strError.c_str());
+        }
+        catch (string strError)
+        {
+            qDebug("%s", strError.c_str());
+        }
+        eRunState = STOPPED;
+    } while (bWaitForStart && !bQuit);
     qDebug("Transmitter working thread complete");
 }
 
@@ -111,7 +128,8 @@ void CTx::Restart()
 
 void CTx::Stop()
 {
-    eRunState = STOP_REQUESTED;
+    if (eRunState != STOPPED)
+        eRunState = STOP_REQUESTED;
 }
 
 CSettings* CTx::GetSettings()

@@ -370,6 +370,9 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
                 lEncSamprate = 12000;
                 break;
 
+            default: /* the rate left by another codec (xHE-AAC and Opus use 48 kHz) is not valid for AAC */
+                Parameters.Service[iCurSelServ].AudioParam.eAudioSamplRate = CAudioParam::AS_24KHZ;
+                /* fall through */
             case CAudioParam::AS_24KHZ:
                 iTimeEachAudBloMS = 40;	/* ms */
                 iNumAudioFrames = 10;
