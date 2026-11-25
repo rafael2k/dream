@@ -248,6 +248,14 @@ void CDRMTransmitter::Init() {
   /* Fetch new sample rate if any */
   Parameters.FetchNewSampleRate();
 
+  /* The xHE-AAC audio entity (SDC type 9) does not fit in the 4-QAM SDC of
+     the narrow channels and of robustness mode D: use the 16-QAM SDC then */
+  if (Parameters.eSDCCodingScheme == CS_1_SM &&
+      Parameters.Service[0].AudioParam.eAudioCoding == CAudioParam::AC_xHE_AAC) {
+    std::cerr << "xHE-AAC needs the 16-QAM SDC: using sdc=CS_2_SM" << std::endl;
+    Parameters.eSDCCodingScheme = CS_2_SM;
+  }
+
   /* Init cell mapping table */
   Parameters.InitCellMapTable(Parameters.GetWaveMode(),
                               Parameters.GetSpectrumOccup());
