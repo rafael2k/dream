@@ -104,7 +104,7 @@ amm-info@iis.fraunhofer.de
 static const MPEGS_BITRATE_BORDERS mpegscfgexpert_treeBitrateTableHE[] =
     {
 
-        {MP4SPACEENC_USAC_212, 12000, 72000, 32000, 20000, 0, 0.0f, 0},
+        {MP4SPACEENC_USAC_212, 10000, 72000, 32000, 20000, 0, 0.0f, 0},
         {MP4SPACEENC_ESCAPE, 0, 0, 0, 0, 0, 0.0f, 0}};
 
 static XHEAACENCLIB_RETURN iisxHEAACEncLibMpegscfgexpert_usacBitrateSettings(MP4SPACEENC_SETUP* pSpaceEncSetupTmp, XHEAACENCLIB_CONFIG_HANDLE const hConfig, const MPEGS_BITRATE_BORDERS bitrateBorders);
