@@ -467,6 +467,16 @@ CAudioSourceEncoderImplementation::InitInternalTx(CParameter & Parameters,
             codec->EncOpen(AudioParam, lNumSampEncIn, lMaxBytesEncOut);
             std::vector<uint8_t> config;
             bXheReady = codec->EncStartStreaming(AudioParam, iAudioPayloadLen, config);
+            if (!bXheReady && iNumChannels == 2)
+            {
+                /* The channel is too narrow for xHE-AAC stereo: send mono rather than silence */
+                std::cerr << "xHE-AAC: stereo does not fit in this channel, using mono" << std::endl;
+                AudioParam.eAudioMode = CAudioParam::AM_MONO;
+                iNumChannels = 1;
+                codec->EncOpen(AudioParam, lNumSampEncIn, lMaxBytesEncOut);
+                config.clear();
+                bXheReady = codec->EncStartStreaming(AudioParam, iAudioPayloadLen, config);
+            }
             if (bXheReady)
             {
                 AudioParam.xHE_AAC_config = config;
